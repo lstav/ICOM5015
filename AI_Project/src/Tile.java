@@ -9,7 +9,11 @@ public class Tile {
 		this.quantity = 100;
 	}
 	
-	public Resource check() {
+	public boolean check() {
+		return quantity > 0;
+	}
+	
+	public Resource getResource() {
 		return resource;
 	}
 		
@@ -18,12 +22,12 @@ public class Tile {
 		return quantity;
 	}
 	
-	public int getQuantity() {
-		return quantity;
-	}
-	
 	public boolean isOccupied() {
 		return isOccupied;
+	}
+	
+	public void setOccupied(boolean isOccupied) {
+		this.isOccupied = isOccupied;
 	}
 	
 }
