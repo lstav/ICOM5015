@@ -5,11 +5,15 @@ public class Tile {
 	private int quantity = 0;
 	
 	public Resource extract() {
-		
+		quantity = quantity - 10;
 	}
 	
 	public int getQuantity() {
 		return quantity;
+	}
+	
+	public boolean isOccupied() {{
+		return isOccupied;
 	}
 	
 }
