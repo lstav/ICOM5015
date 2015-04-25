@@ -7,7 +7,9 @@ public class Resource {
 		// TODO Auto-generated constructor stub
 		switch (i){
 		case 1: Name = "Stone";
+		break;
 		case 2: Name = "Wood";
+		break;
 		case 3: Name = "Iron";
         break;
 		default: break;
@@ -17,6 +19,10 @@ public class Resource {
 	
 	public int getQuantity(){
 		return quantity;
+	}
+	
+	public String getResourceName(){
+		return Name;
 	}
 
 }
