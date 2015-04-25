@@ -10,11 +10,12 @@ public class Tile {
 	}
 	
 	public Resource check() {
-		return Resource;
+		return resource;
 	}
 		
-	public Resource extract() {
+	public int extract() {
 		quantity = quantity - 10;
+		return quantity;
 	}
 	
 	public int getQuantity() {
