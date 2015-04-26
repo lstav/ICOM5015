@@ -15,7 +15,7 @@ public class Moderator {
 		width = x;
 		height = y;
 		map = new Map(x,y);
-		map.Randomize();
+		map.randomize();
 		
 		
 		
