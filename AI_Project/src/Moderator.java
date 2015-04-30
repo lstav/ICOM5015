@@ -1,3 +1,5 @@
+import java.util.Random;
+
 
 public class Moderator {
 	private int width;
@@ -7,6 +9,7 @@ public class Moderator {
 	private Agent[] agents = new Agent[6];
 	private int turns;
 	private Resource[][] resources;
+	private Random rand = new Random();
 
 	public Moderator() {
 		// TODO Auto-generated constructor stub
@@ -20,7 +23,43 @@ public class Moderator {
 	 */
 	public Moderator(int x, int y, int turns) {
 
+		width = x;
+		height = y;
+		this.turns = turns;
 		initializeResourcesArray();
+		startSimulation();
+	}
+	
+	/**
+	 * Starts the simulation
+	 */
+	public void startSimulation() {
+		setMap(width, height);
+		initializeAgentsResources();
+		putAgentsInMap();
+
+		// Run for selected turns
+		for(int i=0; i<turns; i++) {
+			Agent currentAgent = nextAgent(i);
+			
+			// Give map to current agent
+			currentAgent.getMap(map);
+			currentAgent.receiveAgentList(agents);
+			
+			currentAgent.run();
+			
+			while(currentAgent.isRunning()) {
+				// TODO do something here
+				
+			}
+			
+			// If there was a trade in the turn, get new agent list
+			if(currentAgent.traded()) {
+				agents = currentAgent.returnAgentList();
+			}
+			
+			endTurn();
+		}
 	}
 	
 	/**
@@ -69,6 +108,27 @@ public class Moderator {
 	public void initializeAgentsResources() {
 		for(int i = 0; i<6; i++) {
 			agents[i].setResources(resources[i][0], resources[i][1], resources[i][2]);
+		}
+	}
+	
+	/**
+	 * Initializes agents on a random position on map
+	 */
+	public void putAgentsInMap() {
+		for(int i = 0; i<6; i++) {
+			int randomW;
+			int randomH;
+			/*
+			 * Checks for available tile
+			 */
+			do {
+				randomW = rand.nextInt(width);
+				randomH = rand.nextInt(height);
+			} while(map.isOccupied(randomW, randomH));
+			/*
+			 * Puts agent on selected tile
+			 */
+			agents[i].setCoordinates(randomW, randomH);
 		}
 	}
 	

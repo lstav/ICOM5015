@@ -3,20 +3,48 @@ public class Agent {
 	private Map map;
 	private int xCoor;
 	private int yCoor;
-	
+
 	private Resource essentialRes;
 	private int essentialResQty;
-	
+
 	private Resource desirableRed;
 	private int desirableResQty;
-	
+
 	private Resource luxuryRes;
 	private int luxuryResQty;
 	
+	// Coordinates to reach resource
+	private int goalX;
+	private int goalY;
+	
+	private boolean traded = false;
+	
+	private boolean isRunning;
+	
+	private Agent agentList[];
+
 	public Agent() {
-		
+
 	}
 	
+	public void run() {
+		isRunning = true;
+		
+		// TODO do algorithm to search in here
+		
+		
+		
+		isRunning = false;
+	}
+	
+	/**
+	 * Returns status of agent
+	 * @return
+	 */
+	public boolean isRunning() {
+		return isRunning;
+	}
+
 	/**
 	 * Sets the essential, desirable and luxury resources for agent
 	 * @param essential
@@ -26,14 +54,14 @@ public class Agent {
 	public void setResources(Resource essential, Resource desirable, Resource luxury) {
 		essentialRes = essential;
 		essentialResQty = 20;
-		
+
 		desirableRed = desirable;
 		desirableResQty = 15;
-		
+
 		luxuryRes = luxury;
 		luxuryResQty = 15;
 	}
-	
+
 	/**
 	 * Removes resources after turn passed
 	 */
@@ -41,7 +69,7 @@ public class Agent {
 		essentialResQty = essentialResQty - 3;
 		desirableResQty = desirableResQty - 1;
 	}
-	
+
 	/**
 	 * Returns the current score of the agent
 	 * @return current score
@@ -49,7 +77,7 @@ public class Agent {
 	public int getCurrentScore() {
 		return (int) (essentialResQty*.72 + desirableResQty*.24 + luxuryResQty*.04);
 	}
-	
+
 	/**
 	 * Get array with resources quantities
 	 * @return
@@ -58,25 +86,25 @@ public class Agent {
 		int[] quantities = {essentialResQty, desirableResQty, luxuryResQty};
 		return quantities;
 	}
-	
+
 	/**
 	 * Returns the score the agent would get on a turn
-	 * @param essential Number of essential resources taken on a turn
-	 * @param desirable Number of desirable resources taken on a turn
-	 * @param luxury Number of luxury resources taken on a turn
+	 * @param essential Number of essential resources available on a turn
+	 * @param desirable Number of desirable resources available on a turn
+	 * @param luxury Number of luxury resources available on a turn
 	 * @param turnNumber Number of turns to reach and extract a resource
 	 * @param resource Possible resource to extract from tile
 	 * @return score that the agent would get on a given turn
 	 */
 	public int getTurnScore(int essential, int desirable, int luxury, int turnNumber, Resource resource) {
-		
+
 		essential = essential - (turnNumber*3) + (resource.equals(essentialRes)?10:0);
 		desirable = desirable - (turnNumber*1) + (resource.equals(desirableRed)?10:0);;
 		luxury = luxury - (turnNumber*0) + (resource.equals(luxuryRes)?10:0);;
-		
+
 		return (int) (essential*.72 + desirable*.24 + luxury*.04);
 	}
-	
+
 	/**
 	 * Gets the map from moderator
 	 * @param map
@@ -84,7 +112,7 @@ public class Agent {
 	public void getMap(Map map) {
 		this.map = map;
 	}
-	
+
 	/**
 	 * Return modified map to moderator
 	 * @return
@@ -92,22 +120,39 @@ public class Agent {
 	public Map returnMap() {
 		return map;
 	}
-	
+
 	/**
 	 * Moves agent to new position, sets previous tile to empty and new tile to occupied
 	 * @param x
 	 * @param y
+	 * @return true if agent can move, false if tile is occupied
 	 */
-	public void moveAgent(int x, int y) {
-		map.setOccupied(xCoor, yCoor, false);
-		map.setOccupied(x, y, true);
+	public boolean moveAgent(int x, int y) {
+		if (!map.isOccupied(x, y)) {
+			map.setOccupied(xCoor, yCoor, false);
+			map.setOccupied(x, y, true);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Receives the list of agents for trading with other agents and agent order
+	 * @param agents
+	 */
+	public void receiveAgentList(Agent agents[]) {
+		agentList = agents;
 	}
 	
-	
-	public void requestNextAgent() {
-		
+	/**
+	 * Returns the list of agents to the moderator
+	 * @return agentList
+	 */
+	public Agent[] returnAgentList() {
+		return agentList;
 	}
-	
+
 	/**
 	 * Sets agent coordinates
 	 * @param x
@@ -118,7 +163,40 @@ public class Agent {
 		yCoor = y;
 	}
 	
+	/**
+	 * Sets goal coordinates to reach resource
+	 * @param x
+	 * @param y
+	 */
+	public void setGoalCoordinates(int x, int y) {
+		goalX = x;
+		goalY = y;
+	}
+
+	/**
+	 * Explores the tile at coordinates x and y
+	 * @param x
+	 * @param y
+	 * @return resource on tile, if any
+	 */
+	public Resource exploreTile(int x, int y) {
+		if(map.check(x, y) && !map.isOccupied(x, y)) {
+			return map.getResource(x, y);
+		} else {
+			return null;
+		}
+	}
 	
+	/**
+	 * Returns true if agent reached the goal tile
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public boolean reachedGoalTile(int x, int y) {
+		return (x == goalX && y == goalY);
+	}
+
 	/**
 	 * Return agent coordinates
 	 * @return
@@ -127,7 +205,7 @@ public class Agent {
 		int[] coordinates = {xCoor, yCoor};
 		return coordinates;
 	}
-	
+
 	/**
 	 * Makes a trade transaction
 	 */
@@ -135,7 +213,7 @@ public class Agent {
 		essentialResQty = essentialResQty + 10;
 		luxuryResQty = luxuryResQty - 10;
 	}
-	
+
 	/**
 	 * Makes a trade with external agent
 	 * @param agent
@@ -143,7 +221,16 @@ public class Agent {
 	public Agent trade(Agent agent) {
 		agent.trade();
 		this.trade();
+		traded = true;
 		return agent;
 	}
 	
+	/**
+	 * Returns if the agent traded with another agent
+	 * @return
+	 */
+	public boolean traded() {
+		return traded;
+	}
+
 }

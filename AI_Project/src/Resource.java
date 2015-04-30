@@ -26,6 +26,9 @@ public class Resource {
 	}
 	
 	public boolean equals(Resource resource) {
+		if(resource == null) {
+			return false;
+		}
 		return this.getResourceName().equals(resource.getResourceName());
 	}
 
