@@ -24,5 +24,9 @@ public class Resource {
 	public String getResourceName(){
 		return Name;
 	}
+	
+	public boolean equals(Resource resource) {
+		return this.getResourceName().equals(resource.getResourceName());
+	}
 
 }
