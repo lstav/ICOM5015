@@ -4,6 +4,12 @@ public class Tile {
 	private boolean isOccupied = false;
 	private int quantity = 0;
 	
+	public Tile() {
+		resource = null;
+		isOccupied = false;
+		quantity = 0;
+	}
+	
 	/**
 	 * Creates new resource with quantity 100 on tile
 	 * @param resource

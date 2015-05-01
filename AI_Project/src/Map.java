@@ -12,6 +12,15 @@ public class Map {
 		height = y;
 		maxRes = (int) Math.sqrt(x*y)/2; // Maximum number per resource
 		map = new Tile[x][y];
+		initializeTiles();
+	}
+	
+	public void initializeTiles() {
+		for(int i=0; i<width; i++) {
+			for(int j=0; j<height; j++) {
+				map[i][j] = new Tile();
+			}
+		}
 	}
 	
 	/**

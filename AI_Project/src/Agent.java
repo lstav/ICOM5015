@@ -3,6 +3,8 @@ public class Agent {
 	private Map map;
 	private int xCoor;
 	private int yCoor;
+	
+	private int id;
 
 	private Resource essentialRes;
 	private int essentialResQty;
@@ -19,16 +21,23 @@ public class Agent {
 	
 	private boolean traded = false;
 	
+	private boolean lost = false;
+	
 	private boolean isRunning;
 	
 	private Agent agentList[];
 
-	public Agent() {
-
+	public Agent(int id) {
+		this.id = id;
+	}
+	
+	public int getID() {
+		return id;
 	}
 	
 	public void run() {
 		isRunning = true;
+		traded = false;
 		
 		// TODO do algorithm to search in here
 		
@@ -37,6 +46,12 @@ public class Agent {
 		isRunning = false;
 	}
 	
+	public boolean lost() {
+		return lost;
+	}
+	
+	
+		
 	/**
 	 * Returns status of agent
 	 * @return
@@ -68,6 +83,10 @@ public class Agent {
 	public void turnPassed() {
 		essentialResQty = essentialResQty - 3;
 		desirableResQty = desirableResQty - 1;
+		
+		if(essentialResQty < 3 || desirableResQty < 1) {
+			lost = true;
+		}
 	}
 
 	/**
@@ -205,6 +224,37 @@ public class Agent {
 		int[] coordinates = {xCoor, yCoor};
 		return coordinates;
 	}
+	
+	/**
+	 * Returns coordinates of next tile to reach goal node
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public int[] getNextCoordinates(int x, int y) {
+		int nextX = x;
+		int nextY = y;
+		
+		if(nextX > goalX) {
+			nextX = nextX - 1;
+		} else if(nextX < goalX) {
+			nextX = nextX + 1;
+		} else if(nextX == goalX) {
+			nextX = nextX;
+		}
+		
+		if(nextY > goalY) {
+			nextY = nextY - 1;
+		} else if(nextY < goalY) {
+			nextY = nextY + 1;
+		} else if(nextY == goalY) {
+			nextY = nextY;
+		}
+		
+		
+		int[] coordinates = {nextX, nextY};
+		return coordinates;
+	}
 
 	/**
 	 * Makes a trade transaction
@@ -212,6 +262,7 @@ public class Agent {
 	public void trade() {
 		essentialResQty = essentialResQty + 10;
 		luxuryResQty = luxuryResQty - 10;
+		traded = true;
 	}
 
 	/**
