@@ -25,7 +25,7 @@ public class Moderator {
 
 		width = x;
 		height = y;
-		this.turns = turns;
+		this.turns = 6*turns;
 		initializeResourcesArray();
 		inititalizeAgents();
 		startSimulation();
@@ -81,6 +81,7 @@ public class Moderator {
 					agents = currentAgent.returnAgentList();
 				}
 				currentAgent.turnPassed();
+				map = currentAgent.returnMap();
 			}
 
 			endTurn();

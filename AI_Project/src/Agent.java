@@ -9,7 +9,7 @@ public class Agent {
 	private Resource essentialRes;
 	private int essentialResQty;
 
-	private Resource desirableRed;
+	private Resource desirableRes;
 	private int desirableResQty;
 
 	private Resource luxuryRes;
@@ -70,7 +70,7 @@ public class Agent {
 		essentialRes = essential;
 		essentialResQty = 20;
 
-		desirableRed = desirable;
+		desirableRes = desirable;
 		desirableResQty = 15;
 
 		luxuryRes = luxury;
@@ -84,8 +84,9 @@ public class Agent {
 		essentialResQty = essentialResQty - 3;
 		desirableResQty = desirableResQty - 1;
 		
-		if(essentialResQty < 3 || desirableResQty < 1) {
+		if(essentialResQty < 0 || desirableResQty < 0) {
 			lost = true;
+			map.setOccupied(xCoor, yCoor, false);
 		}
 	}
 
@@ -94,6 +95,7 @@ public class Agent {
 	 * @return current score
 	 */
 	public int getCurrentScore() {
+		
 		return (int) (essentialResQty*.72 + desirableResQty*.24 + luxuryResQty*.04);
 	}
 
@@ -118,7 +120,7 @@ public class Agent {
 	public int getTurnScore(int essential, int desirable, int luxury, int turnNumber, Resource resource) {
 
 		essential = essential - (turnNumber*3) + (resource.equals(essentialRes)?10:0);
-		desirable = desirable - (turnNumber*1) + (resource.equals(desirableRed)?10:0);;
+		desirable = desirable - (turnNumber*1) + (resource.equals(desirableRes)?10:0);;
 		luxury = luxury - (turnNumber*0) + (resource.equals(luxuryRes)?10:0);;
 
 		return (int) (essential*.72 + desirable*.24 + luxury*.04);
@@ -231,9 +233,9 @@ public class Agent {
 	 * @param y
 	 * @return
 	 */
-	public int[] getNextCoordinates(int x, int y) {
-		int nextX = x;
-		int nextY = y;
+	public int[] getNextCoordinates(int currentX, int currentY) {
+		int nextX = currentX;
+		int nextY = currentY;
 		
 		if(nextX > goalX) {
 			nextX = nextX - 1;
@@ -259,8 +261,15 @@ public class Agent {
 	/**
 	 * Makes a trade transaction
 	 */
-	public void trade() {
-		essentialResQty = essentialResQty + 10;
+	public void trade(Resource otherLuxuryRes) {
+		if(otherLuxuryRes.equals(essentialRes)) {
+			essentialResQty = essentialResQty + 10;	
+		} else if(otherLuxuryRes.equals(desirableRes)) {
+			desirableResQty = desirableResQty + 10;
+		} else if(otherLuxuryRes.equals(luxuryRes)) {
+			luxuryResQty = luxuryResQty + 10;
+		}
+		
 		luxuryResQty = luxuryResQty - 10;
 		traded = true;
 	}
@@ -269,19 +278,49 @@ public class Agent {
 	 * Makes a trade with external agent
 	 * @param agent
 	 */
-	public Agent trade(Agent agent) {
-		agent.trade();
-		this.trade();
+	public Agent trade(Agent agent, Resource otherLuxuryRes) {
+		agent.trade(getLuxuryRes());
+		this.trade(otherLuxuryRes);
 		traded = true;
 		return agent;
 	}
 	
+	
+	
+	public Resource getEssentialRes() {
+		return essentialRes;
+	}
+
+	public int getEssentialResQty() {
+		return essentialResQty;
+	}
+
+	public Resource getDesirableRed() {
+		return desirableRes;
+	}
+
+	public int getDesirableResQty() {
+		return desirableResQty;
+	}
+
+	public Resource getLuxuryRes() {
+		return luxuryRes;
+	}
+
+	public int getLuxuryResQty() {
+		return luxuryResQty;
+	}
+
 	/**
 	 * Returns if the agent traded with another agent
 	 * @return
 	 */
 	public boolean traded() {
 		return traded;
+	}
+	
+	public boolean canTrade() {
+		return luxuryResQty >= 10;
 	}
 
 }
