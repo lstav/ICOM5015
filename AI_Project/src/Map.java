@@ -10,10 +10,10 @@ public class Map {
 		// TODO Auto-generated constructor stub
 		width = x;
 		height = y;
-		maxRes = (int) Math.sqrt(x*y)/2; // Maximum number per resource
+		maxRes = (int) Math.sqrt(x*y); // Maximum number per resource
 		map = new Tile[x][y];
 		initializeTiles();
-	}
+	}	
 	
 	public void initializeTiles() {
 		for(int i=0; i<width; i++) {
@@ -102,8 +102,8 @@ public class Map {
 	 * @param y
 	 * @return quantity left
 	 */
-	public int extract(int x, int y) {
-		int qty = map[x][y].extract(); 
+	public int extract(int x, int y, int qty2) {
+		int qty = map[x][y].extract(qty2); 
 		if(qty == 0) {
 			randomize(getResource(x, y));
 		}

@@ -16,7 +16,7 @@ public class Tile {
 	 */
 	public void putResource(Resource resource) {
 		this.resource = resource;
-		this.quantity = 100;
+		this.quantity = 10;
 	}
 	
 	/**
@@ -39,8 +39,8 @@ public class Tile {
 	 * Extract 10 resource from tile, returns remaining resources
 	 * @return
 	 */
-	public int extract() {
-		quantity = quantity - 10;
+	public int extract(int qty) {
+		quantity = quantity - qty;
 		return quantity;
 	}
 	

@@ -1,4 +1,12 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
+
+import javax.swing.event.ListSelectionEvent;
+
+import sun.security.util.Length;
 
 public class Moderator {
 	private int width;
@@ -9,6 +17,9 @@ public class Moderator {
 	private int turns;
 	private Resource[][] resources;
 	private Random rand = new Random();
+	private ArrayList<ResourceItem> resourceList = new ArrayList<>();
+	private ArrayList<Integer> randomList = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
+
 
 	public Moderator() {
 		// TODO Auto-generated constructor stub
@@ -25,7 +36,7 @@ public class Moderator {
 
 		width = x;
 		height = y;
-		this.turns = 6*turns;
+		this.turns = agents.length*turns;
 		initializeResourcesArray();
 		inititalizeAgents();
 		startSimulation();
@@ -38,42 +49,38 @@ public class Moderator {
 		setMap(width, height);
 		initializeAgentsResources();
 		putAgentsInMap();
+		populateResourceList();
 
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if (map.check(x, y)) {
-					System.out.print(" "
-							+ map.getResource(x, y).getResourceName().charAt(0)
-							+ " ");
-				} else if (map.isOccupied(x, y)) {
-					System.out.print(" A ");
-				} else {
-					System.out.print(" - ");
-				}
-			}
-			System.out.println("");
-		}
+		//printResourceList();
 
+		/*System.out.println("Initial Map");
+		printMap();*/
+		System.out.println("Starting simulation\n");
 		// Run for selected turns
+		int index = 0;
 		for (int i = 0; i < turns; i++) {
-			System.out.println("Index " + i);
-			if(loneSurvivor()) {
-				System.out.println("Winner Agent " + nextAgent(i).getID());
+			//System.out.println("Index " + i);
+			index = i;
+			/*if(loneSurvivor()) {
+				index = i;
+				System.out.println("Winner Agent " + nextAgent(i).getID() + " at index " + i);
+				System.out.println("With score of " + nextAgent(i).getCurrentScore());
 				break;
-			}
-			
-			Agent currentAgent = nextAgent(i);
+			}*/
+
+			Agent currentAgent = nextAgent();
 
 			if (!currentAgent.lost()) {
 				// Give map to current agent
 				currentAgent.getMap(map);
 				currentAgent.receiveAgentList(agents);
+				currentAgent.receiveResourceList(resourceList);
 
 				currentAgent.run();
 
 				while (currentAgent.isRunning()) {
 					// TODO do something here
-				
+
 				}
 
 				// If there was a trade in the turn, get new agent list
@@ -82,11 +89,74 @@ public class Moderator {
 				}
 				currentAgent.turnPassed();
 				map = currentAgent.returnMap();
-			}
-
+				System.out.println("\nTransition Map");
+				printMap();
+				System.out.println(currentAgent.getEssentialRes().getResourceName() + " " + currentAgent.getEssentialResQty() 
+						+ " " + currentAgent.getDesirableRes().getResourceName() + " " + currentAgent.getDesirableResQty() 
+						+ " " + currentAgent.getLuxuryRes().getResourceName() + " " + currentAgent.getLuxuryResQty());
+				System.out.println("Agent ID " + currentAgent.getID() + " Score " + currentAgent.getCurrentScore());
+				System.out.println("");
+			}			
 			endTurn();
+			if(loneSurvivor()) {
+				index = i;
+				/*System.out.println("Winner Agent " + currentAgent.getID() + " at index " + i);
+				System.out.println("With score of " + currentAgent.getCurrentScore());*/
+				break;
+			}
 		}
-		
+		System.out.println("Winner Agent " + getWinner().getID() + " at index " + index);
+		System.out.println("With score of " + getWinner().getCurrentScore());
+		System.out.println(getWinner().getEssentialRes().getResourceName() + " " + getWinner().getEssentialResQty() 
+				+ " " + getWinner().getDesirableRes().getResourceName() + " " + getWinner().getDesirableResQty() 
+				+ " " + getWinner().getLuxuryRes().getResourceName() + " " + getWinner().getLuxuryResQty());
+		System.out.println("");
+		System.out.println("Final Scores");
+		printAgentScores();
+		//printAgentResources();
+		/*System.out.println("\nFinal Map");
+		printMap();*/
+
+	}
+
+	public Agent getWinner() {
+		Agent winnerAgent = new Agent(-1);
+		int score1 = 0;
+		int score2 = 0;
+		for(int i = 0; i < agents.length; i++) {
+			score2 = agents[i].getCurrentScore();
+			if(!agents[i].lost() && score1 < score2) {
+				score1 = score2;
+				winnerAgent = agents[i];
+			}
+		}
+		return winnerAgent;
+	}
+
+	public void printAgentScores() {
+		for(int i = 0; i < agents.length; i++) {
+			System.out.print("Agent " + agents[i].getID() + " with score " + agents[i].getCurrentScore());
+			if(agents[i].lost()) {
+				System.out.print(" Lost");
+			}
+			System.out.println("");
+		}
+	}
+
+	public void populateResourceList() {
+		resourceList.clear();
+
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(map.check(x, y) && !map.isOccupied(x, y)) {
+					resourceList.add(new ResourceItem(map.getResource(x, y), x, y));
+				}
+			}
+		}
+	}
+
+	public ArrayList<ResourceItem> getResourcesOnMap() {		
+		return resourceList;
 	}
 
 	public void inititalizeAgents() {
@@ -95,19 +165,19 @@ public class Moderator {
 			agents[i] = new Agent(i);
 		}
 	}
-	
+
 	/**
 	 * Checks if there is only one agent left
 	 * @return
 	 */
 	public boolean loneSurvivor() {
-		int agentsLeft = 6;
+		int agentsLeft = agents.length;
 		for (int i=0; i<agents.length; i++) {
 			if(agents[i].lost()) {
 				agentsLeft = agentsLeft - 1;
 			}
 		}
-		
+
 		return agentsLeft <= 1;
 	}
 
@@ -117,29 +187,29 @@ public class Moderator {
 	public void initializeResourcesArray() {
 		resources = new Resource[6][3];
 
-		resources[0][0] = new Resource(0);
-		resources[0][1] = new Resource(1);
-		resources[0][2] = new Resource(2);
+		resources[0][0] = new Resource(1);
+		resources[0][1] = new Resource(2);
+		resources[0][2] = new Resource(3);
 
-		resources[1][0] = new Resource(0);
-		resources[1][1] = new Resource(2);
-		resources[1][2] = new Resource(1);
+		resources[1][0] = new Resource(1);
+		resources[1][1] = new Resource(3);
+		resources[1][2] = new Resource(2);
 
-		resources[2][0] = new Resource(2);
-		resources[2][1] = new Resource(0);
-		resources[2][2] = new Resource(1);
+		resources[2][0] = new Resource(3);
+		resources[2][1] = new Resource(1);
+		resources[2][2] = new Resource(2);
 
-		resources[3][0] = new Resource(2);
-		resources[3][1] = new Resource(1);
-		resources[3][2] = new Resource(0);
+		resources[3][0] = new Resource(3);
+		resources[3][1] = new Resource(2);
+		resources[3][2] = new Resource(1);
 
-		resources[4][0] = new Resource(1);
-		resources[4][1] = new Resource(2);
-		resources[4][2] = new Resource(0);
+		resources[4][0] = new Resource(2);
+		resources[4][1] = new Resource(3);
+		resources[4][2] = new Resource(1);
 
-		resources[5][0] = new Resource(1);
-		resources[5][1] = new Resource(0);
-		resources[5][2] = new Resource(2);
+		resources[5][0] = new Resource(2);
+		resources[5][1] = new Resource(1);
+		resources[5][2] = new Resource(3);
 	}
 
 	public void setMap(int x, int y) {
@@ -154,9 +224,10 @@ public class Moderator {
 	 * Put resources on agents
 	 */
 	public void initializeAgentsResources() {
-		for (int i = 0; i < 6; i++) {
-			agents[i].setResources(resources[i][0], resources[i][1],
-					resources[i][2]);
+		Collections.shuffle(randomList);
+		for (int i = 0; i < agents.length; i++) {
+			agents[i].setResources(resources[randomList.get(i)][0], resources[randomList.get(i)][1],
+					resources[randomList.get(i)][2]);
 		}
 	}
 
@@ -164,7 +235,7 @@ public class Moderator {
 	 * Initializes agents on a random position on map
 	 */
 	public void putAgentsInMap() {
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < agents.length; i++) {
 			int randomW;
 			int randomH;
 			/*
@@ -183,14 +254,60 @@ public class Moderator {
 		}
 	}
 
-	public Agent nextAgent(int i) {
+	public Agent nextAgent() {
 		return agents[user];
 	}
 
 	public void endTurn() {
-		
-		user = ((user + 1) % 6);
-		
+
+		user = ((user + 1) % agents.length);
+
+	}
+
+	public int getAgentID(int x, int y) {
+		for(int i = 0; i < agents.length; i++) {
+			if(agents[i].getCoordinates()[0] == x && agents[i].getCoordinates()[1] == y) {
+				return agents[i].getID();
+			}
+		}
+		return -1;
+	}
+
+	public void printMap() {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (map.check(x, y) && !map.isOccupied(x, y)) {
+					System.out.print(" "
+							+ map.getResource(x, y).getResourceName().charAt(0)
+							+ " ");
+				} else if (map.isOccupied(x, y)) {
+					if(getAgentID(x, y) != -1) {
+						System.out.print(" " + getAgentID(x, y) + " ");
+					} else {
+						System.out.print(" - ");
+					}
+				} else {
+					System.out.print(" - ");
+				}
+			}
+			System.out.println("");
+		}
+
+	}
+
+	public void printResourceList() {
+		for (int i = 0; i < resourceList.size(); i++) {
+			System.out.println("Resource " + resourceList.get(i).getResource().getResourceName() +
+					" {" + resourceList.get(i).getxCoor() + ", " + resourceList.get(i).getyCoor() + "}");
+		}
+	}
+
+	public void printAgentResources() {
+		for (int i = 0; i < agents.length; i++) {
+			System.out.println("Agent " + agents[i].getID() + " ess " + agents[i].getEssentialRes().getResourceName() +
+					" des " + agents[i].getDesirableRes().getResourceName() + " lux " + 
+					agents[i].getLuxuryRes().getResourceName());
+		}
 	}
 
 }
