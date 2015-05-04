@@ -30,7 +30,7 @@ public class Agent {
 
 	private boolean isRunning;
 
-	private Agent agentList[];
+	private ArrayList<Agent> agentList = new ArrayList<>();
 
 	private ArrayList<ResourceItem> resourceList = new ArrayList<>();
 
@@ -47,18 +47,6 @@ public class Agent {
 		return id;
 	}
 
-	@SuppressWarnings("null")
-	public Agent[] copyAgentList() {
-		Agent[] agentsOfShield = {new Agent(0), new Agent(1), new Agent(2), new Agent(3), new Agent(4), new Agent(5)};
-		
-		for(int i = 0; i < agentList.length; i++) {
-			agentsOfShield[i] = agentList[i]; 
-		
-		}
-		
-		return agentsOfShield;		
-		
-	}
 	/**
 	 * Runs the agent
 	 */
@@ -66,7 +54,7 @@ public class Agent {
 		isRunning = true;
 		traded = false;
 		
-		AB.prunn(getID(), 3, copyAgentList());
+		//AB.prunn(getID(), 3, copyAgentList());
 		
 		// TODO do algorithm to search in here
 		ResourceItem closestResource = getBestResource(); // Finds best resource to get
@@ -126,8 +114,6 @@ public class Agent {
 		int tileNumber1;
 		int turnScore1;
 		int currentScore;		
-		
-		int prunID = getID();
 
 		//Collections.shuffle(resourceList);
 
@@ -301,7 +287,7 @@ public class Agent {
 	 * Receives the list of agents for trading with other agents and agent order
 	 * @param agents
 	 */
-	public void receiveAgentList(Agent agents[]) {
+	public void receiveAgentList(ArrayList<Agent> agents) {
 		agentList = agents;
 	}
 
@@ -313,7 +299,7 @@ public class Agent {
 	 * Returns the list of agents to the moderator
 	 * @return agentList
 	 */
-	public Agent[] returnAgentList() {
+	public ArrayList<Agent> returnAgentList() {
 		return agentList;
 	}
 
