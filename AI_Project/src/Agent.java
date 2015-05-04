@@ -143,13 +143,6 @@ public class Agent {
 			}
 		}
 
-		/*Agent listOfAgents[] = agentList.clone();
-		int[] prunningRes = {0, 6};
-		if(canTrade()) {
-			prunningRes = this.AB_pruning(prunID, 3, -1000000, 1000000, 0, listOfAgents);
-			System.out.println("Prunning result " + prunningRes[1]);
-		}*/
-		
 		return new ResourceItem(map.getResource(rX, rY), rX, rY);
 	}
 
