@@ -1,8 +1,13 @@
 
 public class AlphaBeta {
-	int value;
-	int ag;
+	private int value;
+	private int ag;
+	private Agent agentList[];
 
+	private void uploadList(Agent agList[]){
+		for(int i = 0 ; i < 6 ; i++)
+			agentList[i] = agList[i];
+	}
 	private int getValue() {
 		return value;
 	}
