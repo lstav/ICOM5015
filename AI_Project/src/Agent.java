@@ -1,10 +1,13 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class Agent {
 	private Map map;
 	private int xCoor;
 	private int yCoor;
+	
+	private AlphaBeta AB;
 
 	private int id;
 
@@ -33,6 +36,7 @@ public class Agent {
 
 	public Agent(int id) {
 		this.id = id;
+		AB = new AlphaBeta();
 	}
 
 	/**
@@ -43,13 +47,27 @@ public class Agent {
 		return id;
 	}
 
+	@SuppressWarnings("null")
+	public Agent[] copyAgentList() {
+		Agent[] agentsOfShield = {new Agent(0), new Agent(1), new Agent(2), new Agent(3), new Agent(4), new Agent(5)};
+		
+		for(int i = 0; i < agentList.length; i++) {
+			agentsOfShield[i] = agentList[i]; 
+		
+		}
+		
+		return agentsOfShield;		
+		
+	}
 	/**
 	 * Runs the agent
 	 */
 	public void run() {
 		isRunning = true;
 		traded = false;
-
+		
+		AB.prunn(getID(), 3, copyAgentList());
+		
 		// TODO do algorithm to search in here
 		ResourceItem closestResource = getBestResource(); // Finds best resource to get
 		setGoalCoordinates(closestResource.getxCoor(), closestResource.getyCoor()); // Sets coordinates to reach resource
@@ -493,6 +511,8 @@ public class Agent {
 	public boolean canTrade() {
 		return luxuryResQty >= 10;
 	}
+	
+	
 
 	public int[] AB_pruning(int node, int depth, int alpha, int beta,int step, Agent agentList[]){
 		int[] v = {-1000000,6};
