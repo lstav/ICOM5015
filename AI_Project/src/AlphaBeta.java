@@ -1,35 +1,77 @@
 import java.util.ArrayList;
 
-
+/**
+ * Class for Alpha-Beta Pruning analyzer
+ * 
+ * 
+ */
 public class AlphaBeta {
 	private int value;
 	private int ag;
 	private ArrayList<Agent> agentList = new ArrayList<>();
 
-	
+	/**
+	 * Upload a copy of the parameter list
+	 * @param agentList
+	 */
 	public void uploadList(ArrayList<Agent> agentList){
 		this.agentList = agentList;
 	}
+	/**
+	 * 
+	 * @return value of the score
+	 */
 	public int getValue() {
 		return value;
 	}
+	/**
+	 * Sets the value of the score
+	 * @param value
+	 */
 	private void setValue(int value) {
 		this.value = value;
 	}
+	/**
+	 * 
+	 * @return the index of the agent
+	 */
 	public int getAgent() {
 		return ag;
 	}
+	/**
+	 * Sets the value of the agent index
+	 * @param ag
+	 */
 	private void setAg(int ag) {
 		this.ag = ag;
 	}
+	/**
+	 * Alpha Beta constructor
+	 */
 	public AlphaBeta() {
 		// TODO Auto-generated constructor stub
 	}
+	
+	/**
+	 * Run the Alpha-Beta Pruning Algorithm
+	 * @param node the agent in turn
+	 * @param depth depth to be considered at the alpha-beta pruning
+	 */
 	public void prunn(int node,int depth){
 		int[]v = this.AB_pruning(node, depth, -1000000, 1000000, 0, agentList);
 		this.setValue(v[0]);
 		this.setAg(v[1]);
 	}
+	/**
+	 * Run the Alpha-Beta Pruning Algorithm
+	 * @param node the agent in turn
+	 * @param depth depth to be considered at the alpha-beta pruning
+	 * @param alpha the starting alpha
+	 * @param beta the starting beta
+	 * @param step indicates the current level of depth
+	 * @param agentList copy of the list of agents
+	 * @return
+	 */
 	public int[] AB_pruning(int node, int depth, int alpha, int beta,int step, ArrayList<Agent> agentList){
 		int[] v = {-1000000,6};
 		ArrayList<Agent> agentL = agentList;
