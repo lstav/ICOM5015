@@ -71,7 +71,7 @@ public class Agent {
 
 		AB.uploadList(agentsOfShield);
 
-		AB.prunn(getID(), 3);
+		AB.prunn(getID(), 7);
 
 		// TODO do algorithm to search in here
 		ResourceItem closestResource = getBestResource(); // Finds best resource to get
