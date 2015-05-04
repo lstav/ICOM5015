@@ -1,7 +1,7 @@
 
 public class AlphaBeta {
 	int value;
-	Agent ag;
+	int ag;
 
 	private int getValue() {
 		return value;
@@ -9,10 +9,10 @@ public class AlphaBeta {
 	private void setValue(int value) {
 		this.value = value;
 	}
-	private Agent getAg() {
+	private int getAgent() {
 		return ag;
 	}
-	private void setAg(Agent ag) {
+	private void setAg(int ag) {
 		this.ag = ag;
 	}
 	public AlphaBeta() {
@@ -21,7 +21,7 @@ public class AlphaBeta {
 	public void prunn(int node,int depth,Agent agList[]){
 		int[]v = this.AB_pruning(node, depth, -1000000, 1000000, 0, agList);
 		this.setValue(v[0]);
-		this.setAg(agList[v[1]]);
+		this.setAg(v[1]);
 	}
 	public int[] AB_pruning(int node, int depth, int alpha, int beta,int step, Agent agentList[]){
 		int[] v = {-1000000,6};
