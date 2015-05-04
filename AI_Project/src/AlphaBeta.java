@@ -32,7 +32,7 @@ public class AlphaBeta {
 		int[] v = {-1000000,6};
 		Agent agentL[] = agentList.clone();
 		if(agentL[(node+step)%6].lost()) {
-			return agentL[(node+step+1)%6].AB_pruning(node,depth,alpha,beta,step+1,agentL);
+			return this.AB_pruning(node,depth,alpha,beta,step+1,agentL);
 		}
 		else if(depth == 0){
 			
@@ -56,7 +56,7 @@ public class AlphaBeta {
 					if(i != 6 && agentL[(node+step)%6].canTrade() && agentL[i].canTrade()) {
 						agentL[i] = agentL[(node+step)%6].trade(agentL[i],agentL[i].getLuxuryRes());
 					}
-					int vTemp[] = agentL[(node+step)%6].AB_pruning(node,depth-1,alpha,beta,step+1,agentL);
+					int vTemp[] = this.AB_pruning(node,depth-1,alpha,beta,step+1,agentL);
 					v[0] = Math.max(v[0],vTemp[0]);
 					if(alpha<v[0]){
 						alpha = v[0];
@@ -80,8 +80,8 @@ public class AlphaBeta {
 					if(i != 6 && agentL[(node+step)%6].canTrade() && agentL[i].canTrade()) {
 						agentL[i] = agentL[(node+step)%6].trade(agentL[i],agentL[i].getLuxuryRes());
 					}
-					int vTemp[] = agentL[(node+step)%6].AB_pruning(node,depth-1,alpha,beta,step+1,agentL);
-					vTemp[0] = vTemp[0] - agentL[node].AB_pruning(node,0,alpha,beta,step,agentL)[0];
+					int vTemp[] = this.AB_pruning(node,depth-1,alpha,beta,step+1,agentL);
+					vTemp[0] = vTemp[0] - this.AB_pruning(node,0,alpha,beta,step,agentL)[0];
 					v[0] = Math.min(v[0],vTemp[0]);
 					if(beta>v[0]){
 						beta = v[0];
