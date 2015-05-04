@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
 
 
 public class Agent {
@@ -52,7 +51,7 @@ public class Agent {
 		traded = false;
 
 		// TODO do algorithm to search in here
-		ResourceItem closestResource = getClosestResource(); // Finds best resource to get
+		ResourceItem closestResource = getBestResource(); // Finds best resource to get
 		setGoalCoordinates(closestResource.getxCoor(), closestResource.getyCoor()); // Sets coordinates to reach resource
 
 		int[] nextCoor = getNextCoordinates(xCoor, yCoor);
@@ -99,16 +98,18 @@ public class Agent {
 		} else if(resource.equals(luxuryRes)) {
 			luxuryResQty = luxuryResQty + 10;
 		}
-	}
+	}	
 
-	public ResourceItem getClosestResource() {
+	public ResourceItem getBestResource() {
 		int aX = xCoor;
 		int aY = yCoor;
 		int rX;
 		int rY;
 		int tileNumber1;
 		int turnScore1;
-		int currentScore;
+		int currentScore;		
+		
+		int prunID = getID();
 
 		//Collections.shuffle(resourceList);
 
@@ -130,7 +131,8 @@ public class Agent {
 			int turnScore2 = getTurnScore(essentialResQty, desirableResQty, luxuryResQty, 
 					tileNumber2, resource.getResource());
 
-			if(((currentScore <= turnScore2) || (turnScore1 <= turnScore2)) &&
+
+			if(((currentScore < turnScore2) || (turnScore1 <= turnScore2)) &&
 					(!map.isOccupied(tempX, tempY) || (reachedGoalTile(aX, aY))) 
 					&& (map.check(tempX, tempY))) {				
 				rX = tempX;
@@ -140,6 +142,14 @@ public class Agent {
 						tileNumber1, resource.getResource());
 			}
 		}
+
+		/*Agent listOfAgents[] = agentList.clone();
+		int[] prunningRes = {0, 6};
+		if(canTrade()) {
+			prunningRes = this.AB_pruning(prunID, 3, -1000000, 1000000, 0, listOfAgents);
+			System.out.println("Prunning result " + prunningRes[1]);
+		}*/
+		
 		return new ResourceItem(map.getResource(rX, rY), rX, rY);
 	}
 
@@ -165,15 +175,18 @@ public class Agent {
 	 * @param desirable
 	 * @param luxury
 	 */
-	public void setResources(Resource essential, Resource desirable, Resource luxury) {
+	public void setResources(int width, int height, Resource essential, Resource desirable, Resource luxury) {
+		int x = width;
+		int y = height;
+
 		essentialRes = essential;
-		essentialResQty = 20;
+		essentialResQty = (int) Math.sqrt(x*y)*3;
 
 		desirableRes = desirable;
-		desirableResQty = 15;
+		desirableResQty = (int) Math.sqrt(x*y)*2;
 
 		luxuryRes = luxury;
-		luxuryResQty = 15;
+		luxuryResQty = (int) Math.sqrt(x*y)*1;
 	}
 
 	/**
@@ -220,11 +233,19 @@ public class Agent {
 	 */
 	public int getTurnScore(int essential, int desirable, int luxury, int turnNumber, Resource resource) {
 
-		int ess = essential - (turnNumber*3) + (resource.equals(essentialRes)?10:0);
-		int des = desirable - (turnNumber*1) + (resource.equals(desirableRes)?10:0);
-		int lux = luxury - (turnNumber*0) + (resource.equals(luxuryRes)?10:0);
-
-		if(ess <= 0 || des <= 0) {
+		int ess = 0;
+		int des = 0;
+		int lux = 0;
+		if(resource == null) {
+			ess = essential - (turnNumber*3);
+			des = desirable - (turnNumber*1);
+			lux = luxury - (turnNumber*0);
+		} else {
+			ess = essential - (turnNumber*3) + (resource.equals(essentialRes)?10:0);
+			des = desirable - (turnNumber*1) + (resource.equals(desirableRes)?10:0);
+			lux = luxury - (turnNumber*0) + (resource.equals(luxuryRes)?10:0);
+		}
+		if(ess < 0 || des < 0) {
 			return 0;
 		}
 
@@ -352,30 +373,24 @@ public class Agent {
 			nextX = nextX - 1;
 		} else if(nextX < goalX) {
 			nextX = nextX + 1;
-		} else if(nextX == goalX) {
-			nextX = nextX;
-		}
+		} 
 
 		if(nextY > goalY) {
 			nextY = nextY - 1;
 		} else if(nextY < goalY) {
 			nextY = nextY + 1;
-		} else if(nextY == goalY) {
-			nextY = nextY;
-		}
+		} 
 
 		int[] coordinates = {nextX, nextY};
 		return coordinates;
 	}
 
 	public int getNumberOfTilesToGoal(int currentX, int currentY) {
-		int tileNumber = 0;
+		int tileNumber = 1;
 		int nextX = xCoor;
 		int nextY = yCoor;
-		if(nextX == currentX && nextY == currentY) {
-			return 1;
-		}
-		do {
+
+		while(nextX != currentX || nextY != currentY) {
 			if(nextX > currentX) {
 				nextX = nextX - 1;
 			} else if(nextX < currentX) {
@@ -388,9 +403,9 @@ public class Agent {
 				nextY = nextY + 1;
 			} 
 			tileNumber++;
-		} while(nextX != currentX || nextY != currentY);
+		}
 
-		return tileNumber+1;
+		return tileNumber;
 	}
 
 	/**
@@ -415,10 +430,12 @@ public class Agent {
 	 */
 	public Agent trade(Agent agent, Resource otherLuxuryRes) {
 		agent.trade(getLuxuryRes());
-		this.trade(otherLuxuryRes);
+		trade(otherLuxuryRes);
 		traded = true;
 		return agent;
 	}
+	
+	
 
 	/**
 	 * Gets agent's essential resource
@@ -482,6 +499,73 @@ public class Agent {
 	 */
 	public boolean canTrade() {
 		return luxuryResQty >= 10;
+	}
+
+	public int[] AB_pruning(int node, int depth, int alpha, int beta,int step, Agent agentList[]){
+		int[] v = {-1000000,6};
+		Agent agentL[] = agentList.clone();
+		if(agentL[(node+step)%6].lost()) {
+			return agentL[(node+step+1)%6].AB_pruning(node,depth,alpha,beta,step+1,agentL);
+		}
+		else if(depth == 0){
+			
+			int turns = (int)(step / 6)+1;
+			v[0] = agentL[(node+step)%6].getTurnScore(agentL[(node+step)%6].getEssentialResQty(),
+					agentL[(node+step)%6].getDesirableResQty(),agentL[(node+step)%6].getLuxuryResQty(),turns,null);
+			v[0] = ((agentL[(node+step)%6].getDesirableResQty()-turns < 0)||
+					(agentL[(node+step)%6].getEssentialResQty()-(3*turns) < 0)||
+					(agentL[(node+step)%6].getLuxuryResQty()<0)?-1000000:v[0]);
+			v[1] = node;
+			return v;
+		}
+		else if(step%6 == 0){
+			v[0] = -1000000;
+			v[1] = 6;
+			for(int i = 0;i < 7;i++){
+				agentL = agentList;
+				if(i==6 || ( (agentL[i].getLuxuryRes().equals(agentL[(node+step)%6].getEssentialRes()) 
+						|| agentL[i].getLuxuryRes().equals(agentL[(node+step)%6].getDesirableRes())) 
+						&& agentL[i].getEssentialRes().equals(agentL[(node+step)%6].getLuxuryRes()))) {
+					if(i != 6 && agentL[(node+step)%6].canTrade() && agentL[i].canTrade()) {
+						agentL[i] = agentL[(node+step)%6].trade(agentL[i],agentL[i].getLuxuryRes());
+					}
+					int vTemp[] = agentL[(node+step)%6].AB_pruning(node,depth-1,alpha,beta,step+1,agentL);
+					v[0] = Math.max(v[0],vTemp[0]);
+					if(alpha<v[0]){
+						alpha = v[0];
+						v[1] = i;
+					}
+					if(beta <= alpha)
+						break;
+				}
+			}
+			return v;
+		}
+
+		else{
+			v[0] = 1000000;
+			v[1] = 6;
+			for(int i = 0;i < 7;i++){
+				agentL = agentList;
+				if(i==6 || ((agentL[i].getLuxuryRes().equals(agentL[(node+step)%6].getEssentialRes())  
+						|| agentL[i].getLuxuryRes().equals(agentL[(node+step)%6].getDesirableRes())) 
+						&& agentL[i].getEssentialRes().equals(agentL[(node+step)%6].getLuxuryRes()))) {
+					if(i != 6 && agentL[(node+step)%6].canTrade() && agentL[i].canTrade()) {
+						agentL[i] = agentL[(node+step)%6].trade(agentL[i],agentL[i].getLuxuryRes());
+					}
+					int vTemp[] = agentL[(node+step)%6].AB_pruning(node,depth-1,alpha,beta,step+1,agentL);
+					vTemp[0] = vTemp[0] - agentL[node].AB_pruning(node,0,alpha,beta,step,agentL)[0];
+					v[0] = Math.min(v[0],vTemp[0]);
+					if(beta>v[0]){
+						beta = v[0];
+						v[1] = i;
+					}
+					if(beta <= alpha)
+						break;
+				}
+			}
+			return v;
+		}
 	}
 
 }

@@ -59,7 +59,7 @@ public class Moderator {
 		// Run for selected turns
 		int index = 0;
 		for (int i = 0; i < turns; i++) {
-			//System.out.println("Index " + i);
+			System.out.println("Index " + i);
 			index = i;
 			/*if(loneSurvivor()) {
 				index = i;
@@ -89,8 +89,8 @@ public class Moderator {
 				}
 				currentAgent.turnPassed();
 				map = currentAgent.returnMap();
-				System.out.println("\nTransition Map");
-				printMap();
+				/*System.out.println("\nTransition Map");
+				printMap();*/
 				System.out.println(currentAgent.getEssentialRes().getResourceName() + " " + currentAgent.getEssentialResQty() 
 						+ " " + currentAgent.getDesirableRes().getResourceName() + " " + currentAgent.getDesirableResQty() 
 						+ " " + currentAgent.getLuxuryRes().getResourceName() + " " + currentAgent.getLuxuryResQty());
@@ -104,6 +104,7 @@ public class Moderator {
 				System.out.println("With score of " + currentAgent.getCurrentScore());*/
 				break;
 			}
+			verifyMap();
 		}
 		System.out.println("Winner Agent " + getWinner().getID() + " at index " + index);
 		System.out.println("With score of " + getWinner().getCurrentScore());
@@ -226,7 +227,7 @@ public class Moderator {
 	public void initializeAgentsResources() {
 		Collections.shuffle(randomList);
 		for (int i = 0; i < agents.length; i++) {
-			agents[i].setResources(resources[randomList.get(i)][0], resources[randomList.get(i)][1],
+			agents[i].setResources(width, height, resources[randomList.get(i)][0], resources[randomList.get(i)][1],
 					resources[randomList.get(i)][2]);
 		}
 	}
@@ -307,6 +308,22 @@ public class Moderator {
 			System.out.println("Agent " + agents[i].getID() + " ess " + agents[i].getEssentialRes().getResourceName() +
 					" des " + agents[i].getDesirableRes().getResourceName() + " lux " + 
 					agents[i].getLuxuryRes().getResourceName());
+		}
+	}
+	
+	public void verifyMap() {
+		clearMapOccupancy();
+		for (int i = 0; i < agents.length; i++) {
+			map.setOccupied(agents[i].getCoordinates()[0], agents[i].getCoordinates()[1], true);
+		}
+		
+	}
+	
+	public void clearMapOccupancy() {
+		for(int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				map.setOccupied(i, j, false);
+			}
 		}
 	}
 

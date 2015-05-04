@@ -15,6 +15,20 @@ public class Map {
 		initializeTiles();
 	}	
 	
+	
+	
+	public int getWidth() {
+		return width;
+	}
+
+
+
+	public int getHeight() {
+		return height;
+	}
+
+
+
 	public void initializeTiles() {
 		for(int i=0; i<width; i++) {
 			for(int j=0; j<height; j++) {
