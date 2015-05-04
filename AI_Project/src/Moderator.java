@@ -108,12 +108,19 @@ public class Moderator {
 		}
 		System.out.println("Winner Agent " + getWinner().getID() + " at index " + index);
 		System.out.println("With score of " + getWinner().getCurrentScore());
-		System.out.println(getWinner().getEssentialRes().getResourceName() + " " + getWinner().getEssentialResQty() 
-				+ " " + getWinner().getDesirableRes().getResourceName() + " " + getWinner().getDesirableResQty() 
-				+ " " + getWinner().getLuxuryRes().getResourceName() + " " + getWinner().getLuxuryResQty());
+		System.out.println(getWinner().getEssentialRes().getResourceName() + " " 
+				+ getWinner().getEssentialResQty() 
+				+ " " + getWinner().getDesirableRes().getResourceName() + " " 
+				+ getWinner().getDesirableResQty() 
+				+ " " + getWinner().getLuxuryRes().getResourceName() + " " 
+				+ getWinner().getLuxuryResQty());
 		System.out.println("");
 		System.out.println("Final Scores");
 		printAgentScores();
+		
+		System.out.println("");
+		
+		//printAgentResources();
 		//printAgentResources();
 		/*System.out.println("\nFinal Map");
 		printMap();*/

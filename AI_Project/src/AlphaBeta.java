@@ -6,18 +6,17 @@ public class AlphaBeta {
 	private int ag;
 	private ArrayList<Agent> agentList = new ArrayList<>();
 
-	/*
-	private void uploadList(Agent agList[]){
-		for(int i = 0 ; i < 6 ; i++)
-			agentList[i] = agList[i];
-	}*/
-	private int getValue() {
+	
+	public void uploadList(ArrayList<Agent> agentList){
+		this.agentList = agentList;
+	}
+	public int getValue() {
 		return value;
 	}
 	private void setValue(int value) {
 		this.value = value;
 	}
-	private int getAgent() {
+	public int getAgent() {
 		return ag;
 	}
 	private void setAg(int ag) {
@@ -57,7 +56,10 @@ public class AlphaBeta {
 						|| agentL.get(i).getLuxuryRes().equals(agentL.get((node+step)%6).getDesirableRes())) 
 						&& agentL.get(i).getEssentialRes().equals(agentL.get((node+step)%6).getLuxuryRes()))) {
 					if(i != 6 && agentL.get((node+step)%6).canTrade() && agentL.get(i).canTrade()) {
-						agentL.set(i, agentL.get((node+step)%6).trade(agentL.get(i),agentL.get(i).getLuxuryRes()));
+						Agent l = agentL.get(i);
+						Agent c = agentL.get((node+step)%6);
+						//agentL.set(i, agentL.get((node+step)%6).trade(agentL.get(i),agentL.get(i).getLuxuryRes()));
+						l = c.trade(l,l.getLuxuryRes());
 					}
 					int vTemp[] = this.AB_pruning(node,depth-1,alpha,beta,step+1,agentL);
 					v[0] = Math.max(v[0],vTemp[0]);
@@ -84,7 +86,7 @@ public class AlphaBeta {
 						//agentL[i] = agentL[(node+step)%6].trade(agentL[i],agentL[i].getLuxuryRes());
 					}
 					int vTemp[] = this.AB_pruning(node,depth-1,alpha,beta,step+1,agentL);
-					//vTemp[0] = vTemp[0] - this.AB_pruning(node,0,alpha,beta,step,agentL)[0];
+					vTemp[0] = vTemp[0] - this.AB_pruning(node,0,alpha,beta,step,agentL)[0];
 					v[0] = Math.min(v[0],vTemp[0]);
 					if(beta>v[0]){
 						beta = v[0];

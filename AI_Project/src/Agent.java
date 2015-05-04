@@ -1,12 +1,13 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 
 public class Agent {
 	private Map map;
 	private int xCoor;
 	private int yCoor;
-	
+
 	private AlphaBeta AB;
 
 	private int id;
@@ -47,48 +48,67 @@ public class Agent {
 		return id;
 	}
 
+	public ArrayList<Agent> copyArray(ArrayList<Agent> agents) {
+		ArrayList<Agent> aglist = new ArrayList<>();
+
+		for (int i = 0; i < agents.size(); i++) {
+			aglist.add(agents.get(i).clone());
+		}
+
+		return aglist;
+	}
+
 	/**
 	 * Runs the agent
 	 */
 	public void run() {
 		isRunning = true;
 		traded = false;
-		
-		//AB.prunn(getID(), 3, copyAgentList());
-		
+
+		ArrayList<Agent> agentsOfShield = new ArrayList<>();
+
+		agentsOfShield = copyArray(agentList);
+
+		AB.uploadList(agentsOfShield);
+
+		AB.prunn(getID(), 3);
+
 		// TODO do algorithm to search in here
 		ResourceItem closestResource = getBestResource(); // Finds best resource to get
-		setGoalCoordinates(closestResource.getxCoor(), closestResource.getyCoor()); // Sets coordinates to reach resource
 
-		int[] nextCoor = getNextCoordinates(xCoor, yCoor);
+		if(!traded()) {
+			setGoalCoordinates(closestResource.getxCoor(), closestResource.getyCoor()); // Sets coordinates to reach resource
 
-		if(reachedGoalTile(xCoor, yCoor) && map.check(xCoor, yCoor)) {
-			//if(xCoor == goalX && yCoor == goalY && map.check(goalX, goalY)) {
-			System.out.println(essentialRes.getResourceName() + " " + essentialResQty 
-					+ " " + desirableRes.getResourceName() + " " + desirableResQty +
-					" " + luxuryRes.getResourceName() + " " + luxuryResQty);
-			int extractQty = 0;
-			if(map.getResource(xCoor, yCoor).equals(essentialRes)) {
-				extractQty = 10;
-			} else if(map.getResource(xCoor, yCoor).equals(desirableRes)) {
-				extractQty = 10;
-			} else if(map.getResource(xCoor, yCoor).equals(luxuryRes)) {
-				extractQty = 10;
+			int[] nextCoor = getNextCoordinates(xCoor, yCoor);
+
+			if(reachedGoalTile(xCoor, yCoor) && map.check(xCoor, yCoor)) {
+				//if(xCoor == goalX && yCoor == goalY && map.check(goalX, goalY)) {
+				System.out.println(essentialRes.getResourceName() + " " + essentialResQty 
+						+ " " + desirableRes.getResourceName() + " " + desirableResQty +
+						" " + luxuryRes.getResourceName() + " " + luxuryResQty);
+				int extractQty = 0;
+				if(map.getResource(xCoor, yCoor).equals(essentialRes)) {
+					extractQty = 10;
+				} else if(map.getResource(xCoor, yCoor).equals(desirableRes)) {
+					extractQty = 10;
+				} else if(map.getResource(xCoor, yCoor).equals(luxuryRes)) {
+					extractQty = 10;
+				}
+
+				System.out.println("Agent " + getID() + " getting resource " + map.getResource(xCoor, yCoor).getResourceName() 
+						+ " on {" + xCoor + ", " + yCoor + "} " + "Quantity left " + map.extract(xCoor, yCoor, extractQty));
+				getResourceOnExtract(map.getResource(xCoor, yCoor), 10);
+			} else {
+				System.out.println(essentialRes.getResourceName() + " " + essentialResQty 
+						+ " " + desirableRes.getResourceName() + " " + desirableResQty +
+						" " + luxuryRes.getResourceName() + " " + luxuryResQty);
+				System.out.print("Moving agent " + getID() + " from {" + xCoor +", " + yCoor + "} to ");
+				moveAgent(nextCoor[0], nextCoor[1]);
+				System.out.print("{" + xCoor +", " + yCoor + "} ");
+				System.out.print("to reach goal {" + goalX +", " + goalY + "}");
+				System.out.println(" and resource " + map.getResource(goalX, goalY).getResourceName());
+
 			}
-
-			System.out.println("Agent " + getID() + " getting resource " + map.getResource(xCoor, yCoor).getResourceName() 
-					+ " on {" + xCoor + ", " + yCoor + "} " + "Quantity left " + map.extract(xCoor, yCoor, extractQty));
-			getResourceOnExtract(map.getResource(xCoor, yCoor), 10);
-		} else {
-			System.out.println(essentialRes.getResourceName() + " " + essentialResQty 
-					+ " " + desirableRes.getResourceName() + " " + desirableResQty +
-					" " + luxuryRes.getResourceName() + " " + luxuryResQty);
-			System.out.print("Moving agent " + getID() + " from {" + xCoor +", " + yCoor + "} to ");
-			moveAgent(nextCoor[0], nextCoor[1]);
-			System.out.print("{" + xCoor +", " + yCoor + "} ");
-			System.out.print("to reach goal {" + goalX +", " + goalY + "}");
-			System.out.println(" and resource " + map.getResource(goalX, goalY).getResourceName());
-
 		}
 
 		//System.out.println("Agent ID " + getID() + " {" + xCoor + "," + yCoor + "}");
@@ -144,6 +164,13 @@ public class Agent {
 				tileNumber1 = getNumberOfTilesToGoal(rX, rY);
 				turnScore1 = getTurnScore(essentialResQty, desirableResQty, luxuryResQty, 
 						tileNumber1, resource.getResource());
+			}
+		}
+
+		if(tileNumber1 < AB.getValue()) {
+			if(agentList.get(AB.getAgent()).canTrade() && canTrade()) {
+				trade(agentList.get(AB.getAgent()), agentList.get(AB.getAgent()).getLuxuryRes());
+				System.out.println("Agent " + getID() + " traded with " + AB.getAgent());
 			}
 		}
 
@@ -431,8 +458,8 @@ public class Agent {
 		traded = true;
 		return agent;
 	}
-	
-	
+
+
 
 	/**
 	 * Gets agent's essential resource
@@ -497,8 +524,8 @@ public class Agent {
 	public boolean canTrade() {
 		return luxuryResQty >= 10;
 	}
-	
-	
+
+
 
 	public int[] AB_pruning(int node, int depth, int alpha, int beta,int step, Agent agentList[]){
 		int[] v = {-1000000,6};
@@ -507,7 +534,7 @@ public class Agent {
 			return agentL[(node+step+1)%6].AB_pruning(node,depth,alpha,beta,step+1,agentL);
 		}
 		else if(depth == 0){
-			
+
 			int turns = (int)(step / 6)+1;
 			v[0] = agentL[(node+step)%6].getTurnScore(agentL[(node+step)%6].getEssentialResQty(),
 					agentL[(node+step)%6].getDesirableResQty(),agentL[(node+step)%6].getLuxuryResQty(),turns,null);
@@ -565,6 +592,28 @@ public class Agent {
 			}
 			return v;
 		}
+	}
+
+	private void setResources(Resource essential, int essQty, Resource desirable, int desQty, Resource luxury, int luxQty) {
+
+		essentialRes = essential;
+		essentialResQty = essQty;
+
+		desirableRes = desirable;
+		desirableResQty = desQty;
+
+		luxuryRes = luxury;
+		luxuryResQty = luxQty;
+	}
+
+	public Agent clone() {
+		Agent agentClone = new Agent(getID());
+		agentClone.setCoordinates(xCoor, yCoor);
+		agentClone.setGoalCoordinates(goalX, goalY);
+		agentClone.setResources(getEssentialRes(), getEssentialResQty(), getDesirableRes(), getDesirableResQty(), getLuxuryRes(), getLuxuryResQty());
+
+		return agentClone;
+
 	}
 
 }
