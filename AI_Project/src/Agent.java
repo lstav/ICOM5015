@@ -35,6 +35,10 @@ public class Agent {
 
 	private ArrayList<ResourceItem> resourceList = new ArrayList<>();
 
+	/**
+	 * Creates agent and gives it a unique ID
+	 * @param id
+	 */
 	public Agent(int id) {
 		this.id = id;
 		AB = new AlphaBeta();
@@ -48,6 +52,11 @@ public class Agent {
 		return id;
 	}
 
+	/**
+	 * Makes a copy of the array of agents
+	 * @param agents
+	 * @return
+	 */
 	public ArrayList<Agent> copyArray(ArrayList<Agent> agents) {
 		ArrayList<Agent> aglist = new ArrayList<>();
 
@@ -62,27 +71,31 @@ public class Agent {
 	 * Runs the agent
 	 */
 	public void run() {
-		isRunning = true;
+		isRunning = true; // Starts running
 		traded = false;
 
 		ArrayList<Agent> agentsOfShield = new ArrayList<>();
 
 		agentsOfShield = copyArray(agentList);
 
-		AB.uploadList(agentsOfShield);
+		AB.uploadList(agentsOfShield); // Upload the agent list to the ab pruning class
 
-		AB.prunn(getID(), 3);
+		AB.prunn(getID(), 3); // Starts the pruning with initial agent
 
-		// TODO do algorithm to search in here
 		ResourceItem closestResource = getBestResource(); // Finds best resource to get
 
+		/*
+		 * Checks if there was a trade
+		 */
 		if(!traded()) {
 			setGoalCoordinates(closestResource.getxCoor(), closestResource.getyCoor()); // Sets coordinates to reach resource
 
-			int[] nextCoor = getNextCoordinates(xCoor, yCoor);
+			int[] nextCoor = getNextCoordinates(xCoor, yCoor); // Gets the next coordinates to reach goal
 
+			/*
+			 * Extracts resource or moves to other resource
+			 */
 			if(reachedGoalTile(xCoor, yCoor) && map.check(xCoor, yCoor)) {
-				//if(xCoor == goalX && yCoor == goalY && map.check(goalX, goalY)) {
 				System.out.println(essentialRes.getResourceName() + " " + essentialResQty 
 						+ " " + desirableRes.getResourceName() + " " + desirableResQty +
 						" " + luxuryRes.getResourceName() + " " + luxuryResQty);
@@ -111,11 +124,14 @@ public class Agent {
 			}
 		}
 
-		//System.out.println("Agent ID " + getID() + " {" + xCoor + "," + yCoor + "}");
-
-		isRunning = false;
+		isRunning = false; // Stops running
 	}
 
+	/**
+	 * Adds the extracted resource to agent
+	 * @param resource extracted resource
+	 * @param quantity 
+	 */
 	public void getResourceOnExtract(Resource resource, int quantity) {
 		if(resource.equals(essentialRes)) {
 			essentialResQty = essentialResQty + 10;
@@ -126,6 +142,10 @@ public class Agent {
 		}
 	}	
 
+	/**
+	 * Finds the best resource to extract
+	 * @return resource
+	 */
 	public ResourceItem getBestResource() {
 		int aX = xCoor;
 		int aY = yCoor;
@@ -133,32 +153,38 @@ public class Agent {
 		int rY;
 		int tileNumber1;
 		int turnScore1;
-		int currentScore;		
 
-		//Collections.shuffle(resourceList);
-
+		/*
+		 * Saves first result's location
+		 */
 		rX = resourceList.get(0).getxCoor();
 		rY = resourceList.get(0).getyCoor();
 
-		currentScore = getCurrentScore();
-		tileNumber1 = getNumberOfTilesToGoal(rX, rY);
+		tileNumber1 = getNumberOfTilesToGoal(rX, rY); // Number of tiles to reach first resource
 		turnScore1 = getTurnScore(essentialResQty, desirableResQty, luxuryResQty, 
-				tileNumber1, resourceList.get(0).getResource());
-
+				tileNumber1, resourceList.get(0).getResource()); // Gets the score to reach first resource
 
 		for(int i = 0; i < resourceList.size(); i++) {
 			ResourceItem resource = resourceList.get(i);
 
+			/*
+			 * Saves next result's location
+			 */
 			int tempX = resource.getxCoor();
 			int tempY = resource.getyCoor();
-			int tileNumber2 = getNumberOfTilesToGoal(tempX, tempY);
+			int tileNumber2 = getNumberOfTilesToGoal(tempX, tempY); // Number of tiles to reach next resource
 			int turnScore2 = getTurnScore(essentialResQty, desirableResQty, luxuryResQty, 
-					tileNumber2, resource.getResource());
+					tileNumber2, resource.getResource()); // Gets the score to reach next resource
 
-
-			if(((currentScore < turnScore2) || (turnScore1 <= turnScore2)) &&
+			/*
+			 * Checks if the next result has a better score and if it can be gathered
+			 */
+			if(((turnScore1 <= turnScore2)) &&
 					(!map.isOccupied(tempX, tempY) || (reachedGoalTile(aX, aY))) 
 					&& (map.check(tempX, tempY))) {				
+				/*
+				 * Sets current location to the highest score location
+				 */
 				rX = tempX;
 				rY = tempY;
 				tileNumber1 = getNumberOfTilesToGoal(rX, rY);
@@ -167,10 +193,16 @@ public class Agent {
 			}
 		}
 
-		if(tileNumber1 < AB.getValue()) {
-			if(agentList.get(AB.getAgent()).canTrade() && canTrade()) {
-				trade(agentList.get(AB.getAgent()), agentList.get(AB.getAgent()).getLuxuryRes());
-				System.out.println("Agent " + getID() + " traded with " + AB.getAgent());
+		/*
+		 * Checks if the pruning returned a better score than the gathering or moving in the map
+		 */
+		if(AB.getAgent() != 6) {
+			if(turnScore1 < AB.getValue()) {
+				// Checks if agents can trade
+				if(agentList.get(AB.getAgent()).canTrade() && canTrade()) {
+					trade(agentList.get(AB.getAgent()), agentList.get(AB.getAgent()).getLuxuryRes());
+					System.out.println("Agent " + getID() + " traded with " + AB.getAgent());
+				}
 			}
 		}
 
@@ -318,6 +350,10 @@ public class Agent {
 		agentList = agents;
 	}
 
+	/**
+	 * Gets resource list on map from moderator
+	 * @param resourceList
+	 */
 	public void receiveResourceList(ArrayList<ResourceItem> resourceList) {
 		this.resourceList = resourceList;	
 	}
@@ -409,21 +445,27 @@ public class Agent {
 		return coordinates;
 	}
 
-	public int getNumberOfTilesToGoal(int currentX, int currentY) {
+	/**
+	 * Returns the number of tiles to reach goal
+	 * @param goalX goal x coordinates
+	 * @param goalY goal y coordinates
+	 * @return
+	 */
+	public int getNumberOfTilesToGoal(int goalX, int goalY) {
 		int tileNumber = 1;
 		int nextX = xCoor;
 		int nextY = yCoor;
 
-		while(nextX != currentX || nextY != currentY) {
-			if(nextX > currentX) {
+		while(nextX != goalX || nextY != goalY) {
+			if(nextX > goalX) {
 				nextX = nextX - 1;
-			} else if(nextX < currentX) {
+			} else if(nextX < goalX) {
 				nextX = nextX + 1;
 			} 
 
-			if(nextY > currentY) {
+			if(nextY > goalY) {
 				nextY = nextY - 1;
-			} else if(nextY < currentY) {
+			} else if(nextY < goalY) {
 				nextY = nextY + 1;
 			} 
 			tileNumber++;
@@ -458,8 +500,6 @@ public class Agent {
 		traded = true;
 		return agent;
 	}
-
-
 
 	/**
 	 * Gets agent's essential resource
@@ -525,10 +565,8 @@ public class Agent {
 		return luxuryResQty >= 10;
 	}
 
-
-
 	/**
-	 * Distributes the resources for the start of the game
+	 * Distributes the resources for the copy of the agent
 	 * @param essential Indicates the Essential Resource
 	 * @param essQty Indicates the Essential Resource Quantity
 	 * @param desirable Indicates the Desirable Resource

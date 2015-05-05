@@ -100,7 +100,6 @@ public class AlphaBeta {
 					if(i != 6 && agentL.get((node+step)%6).canTrade() && agentL.get(i).canTrade()) {
 						Agent l = agentL.get(i);
 						Agent c = agentL.get((node+step)%6);
-						//agentL.set(i, agentL.get((node+step)%6).trade(agentL.get(i),agentL.get(i).getLuxuryRes()));
 						l = c.trade(l,l.getLuxuryRes());
 					}
 					int vTemp[] = this.AB_pruning(node,depth-1,alpha,beta,step+1,agentL);

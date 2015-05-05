@@ -4,6 +4,9 @@ public class Tile {
 	private boolean isOccupied = false;
 	private int quantity = 0;
 	
+	/**
+	 * Creates new tile
+	 */
 	public Tile() {
 		resource = null;
 		isOccupied = false;

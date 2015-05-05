@@ -6,6 +6,11 @@ public class Map {
 	private int width,height, maxRes;
 	private Random rand = new Random();
 
+	/**
+	 * Creates new map
+	 * @param x
+	 * @param y
+	 */
 	public Map(int x, int y) {
 		// TODO Auto-generated constructor stub
 		width = x;
@@ -15,20 +20,25 @@ public class Map {
 		initializeTiles();
 	}	
 	
-	
-	
+	/**
+	 * Gets width of map	
+	 * @return
+	 */
 	public int getWidth() {
 		return width;
 	}
 
-
-
+	/**
+	 * Gets height of map
+	 * @return
+	 */
 	public int getHeight() {
 		return height;
 	}
 
-
-
+	/**
+	 * Initializes tiles
+	 */
 	public void initializeTiles() {
 		for(int i=0; i<width; i++) {
 			for(int j=0; j<height; j++) {

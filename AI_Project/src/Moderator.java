@@ -51,8 +51,6 @@ public class Moderator {
 		putAgentsInMap();
 		populateResourceList();
 
-		//printResourceList();
-
 		/*System.out.println("Initial Map");
 		printMap();*/
 		System.out.println("Starting simulation\n");
@@ -61,12 +59,6 @@ public class Moderator {
 		for (int i = 0; i < turns; i++) {
 			System.out.println("Index " + i);
 			index = i;
-			/*if(loneSurvivor()) {
-				index = i;
-				System.out.println("Winner Agent " + nextAgent(i).getID() + " at index " + i);
-				System.out.println("With score of " + nextAgent(i).getCurrentScore());
-				break;
-			}*/
 
 			Agent currentAgent = nextAgent();
 
@@ -79,8 +71,7 @@ public class Moderator {
 				currentAgent.run();
 
 				while (currentAgent.isRunning()) {
-					// TODO do something here
-
+				
 				}
 
 				// If there was a trade in the turn, get new agent list
@@ -91,6 +82,10 @@ public class Moderator {
 				map = currentAgent.returnMap();
 				/*System.out.println("\nTransition Map");
 				printMap();*/
+				
+				/*
+				 * Prints resources of the running agent 
+				 */
 				System.out.println(currentAgent.getEssentialRes().getResourceName() + " " + currentAgent.getEssentialResQty() 
 						+ " " + currentAgent.getDesirableRes().getResourceName() + " " + currentAgent.getDesirableResQty() 
 						+ " " + currentAgent.getLuxuryRes().getResourceName() + " " + currentAgent.getLuxuryResQty());
@@ -101,12 +96,13 @@ public class Moderator {
 			verifyMap();
 			if(loneSurvivor()) {
 				index = i;
-				/*System.out.println("Winner Agent " + currentAgent.getID() + " at index " + i);
-				System.out.println("With score of " + currentAgent.getCurrentScore());*/
 				break;
 			}
 
 		}
+		/*
+		 * Shows the winner of the simulation
+		 */
 		if(getWinner().getID() == -1) {
 			System.out.println("No winner");
 		} else {
@@ -119,19 +115,23 @@ public class Moderator {
 					+ " " + getWinner().getLuxuryRes().getResourceName() + " " 
 					+ getWinner().getLuxuryResQty());
 			System.out.println("");
-			System.out.println("Final Scores");
+			
 		}
-		//printAgentScores();
+		
+		System.out.println("Final Scores");
+		printAgentScores();
 
 		System.out.println("");
 
-		//printAgentResources();
-		//printAgentResources();
 		/*System.out.println("\nFinal Map");
 		printMap();*/
 
 	}
 
+	/**
+	 * Selects winner of simulation
+	 * @return winnerAgent
+	 */
 	public Agent getWinner() {
 		Agent winnerAgent = new Agent(-1);
 		int score1 = 0;
@@ -146,6 +146,9 @@ public class Moderator {
 		return winnerAgent;
 	}
 
+	/**
+	 * Prints the scores of the agents and if they lost
+	 */
 	public void printAgentScores() {
 		for(int i = 0; i < agents.size(); i++) {
 			System.out.print("Agent " + agents.get(i).getID() + " with score " + agents.get(i).getCurrentScore());
@@ -156,6 +159,9 @@ public class Moderator {
 		}
 	}
 
+	/**
+	 * Populates the resource list from the map resources
+	 */
 	public void populateResourceList() {
 		resourceList.clear();
 
@@ -168,13 +174,19 @@ public class Moderator {
 		}
 	}
 
+	/**
+	 * Returns the resource list from the map
+	 * @return resourceList
+	 */
 	public ArrayList<ResourceItem> getResourcesOnMap() {		
 		return resourceList;
 	}
 
+	/**
+	 * Initializes the agents with a unique ID
+	 */
 	public void inititalizeAgents() {
 		for (int i = 0; i < 6; i++) {
-
 			agents.add(new Agent(i));
 		}
 	}
@@ -225,6 +237,11 @@ public class Moderator {
 		resources[5][2] = new Resource(3);
 	}
 
+	/**
+	 * Creates map
+	 * @param x width
+	 * @param y height
+	 */
 	public void setMap(int x, int y) {
 		user = 0;
 		width = x;
@@ -267,16 +284,29 @@ public class Moderator {
 		}
 	}
 
+	/**
+	 * Gets the next agent to run
+	 * @return nest Agent
+	 */
 	public Agent nextAgent() {
 		return agents.get(user);
 	}
 
+	/**
+	 * Gets the next agent index after turn
+	 */
 	public void endTurn() {
 
 		user = ((user + 1) % agents.size());
 
 	}
 
+	/**
+	 * Gets the ID for the agent at position {x, y}
+	 * @param x
+	 * @param y
+	 * @return agent
+	 */
 	public int getAgentID(int x, int y) {
 		for(int i = 0; i < agents.size(); i++) {
 			if(agents.get(i).getCoordinates()[0] == x && agents.get(i).getCoordinates()[1] == y) {
@@ -286,6 +316,9 @@ public class Moderator {
 		return -1;
 	}
 
+	/**
+	 * Prints the map
+	 */
 	public void printMap() {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -308,6 +341,9 @@ public class Moderator {
 
 	}
 
+	/**
+	 * Prints the resource list and their position
+	 */
 	public void printResourceList() {
 		for (int i = 0; i < resourceList.size(); i++) {
 			System.out.println("Resource " + resourceList.get(i).getResource().getResourceName() +
@@ -315,6 +351,9 @@ public class Moderator {
 		}
 	}
 
+	/**
+	 * Prints the agents resources
+	 */
 	public void printAgentResources() {
 		for (int i = 0; i < agents.size(); i++) {
 			System.out.println("Agent " + agents.get(i).getID() + " ess " + agents.get(i).getEssentialRes().getResourceName() +
@@ -323,6 +362,9 @@ public class Moderator {
 		}
 	}
 
+	/**
+	 * Verifies position of agents in map
+	 */
 	public void verifyMap() {
 		clearMapOccupancy();
 		for (int i = 0; i < agents.size(); i++) {
@@ -331,6 +373,9 @@ public class Moderator {
 
 	}
 
+	/**
+	 * Clear the map's occupancy from agents
+	 */
 	public void clearMapOccupancy() {
 		for(int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
